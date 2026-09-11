@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kira Gestión IA — Control Total de tu Negocio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        kira: {
+                            dark: '#1a1a2e',
+                            primary: '#4361ee',
+                            secondary: '#3f37c9',
+                            accent: '#4cc9f0',
+                            success: '#4ade80',
+                            danger: '#f87171',
+                            neutral: '#f1f5f9'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen">
+
+    <!-- 🔐 PANTALLA DE LOGIN / REGISTRO -->
+    <div id="pantallaLogin" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-700 px-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-indigo-600">✨ Kira Gestión IA</h1>
+                <p class="text-slate-500 mt-2">Control inteligente para tu negocio</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex mb-6 bg-slate-100 rounded-lg p-1">
+                <button id="tabLogin" class="flex-1 py-2 rounded-md bg-white shadow text-indigo-600 font-semibold">Iniciar Sesión</button>
+                <button id="tabRegistro" class="flex-1 py-2 rounded-md text-slate-500 font-semibold hover:bg-slate-200">Registrarse</button>
+            </div>
+
+            <!-- Formulario Login -->
+            <form id="formLogin" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">📧 Gmail / Correo</label>
+                    <input type="email" id="loginCorreo" required
+                        class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        placeholder="tu@gmail.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">🔑 Contraseña</label>
+                    <input type="password" id="loginPass" required
+                        class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold p-3 rounded-lg hover:bg-indigo-700 transition">
+                    Ingresar →
+                </button>
+            </form>
+
+            <!-- Formulario Registro -->
+            <form id="formRegistro" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">👋 Tu Nombre / Negocio</label>
+                    <input type="text" id="regNombre" required
+                        class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Ej: Tienda Kira">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">📧 Gmail / Correo</label>
+                    <input type="email" id="regCorreo" required
+                        class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        placeholder="tu@gmail.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">🔑 Contraseña (mínimo 6 caracteres)</label>
+                    <input type="password" id="regPass" required minlength="6"
+                        class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-green-500 text-white font-semibold p-3 rounded-lg hover:bg-green-600 transition">
+                    Registrarse ✅
+                </button>
+            </form>
+
+            <p id="mensajeAuth" class="text-center text-sm mt-4 text-slate-500"></p>
+        </div>
+    </div>
+
+    <!-- ✅ PANTALLA PRINCIPAL (solo tras login) -->
+    <div id="appPrincipal" class="hidden">
+        <!-- Cabecera -->
+        <header class="gradient-bg text-white shadow-lg" style="background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);">
+            <div class="container mx-auto px-4 py-5">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-bold">✨ Kira</span>
+                        <span class="bg-white/20 px-2 py-1 rounded text-sm">Gestión IA</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="usuarioActivo" class="text-sm hidden md:inline">Usuario</span>
+                        <button id="btnCerrarSesion" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-sm transition">
+                            <i class="fa fa-sign-out mr-1"></i> Salir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 py-8 max-w-7xl">
+            <!-- 📊 PANEL PRINCIPAL -->
+            <section id="dashboard" class="mb-16">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fa fa-chart-pie text-indigo-600"></i> Panel General
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                    <div class="bg-white rounded-xl p-5 shadow-md border-l-4 border-green-500">
+                        <p class="text-slate-500 text-sm">Total Ingresos</p>
+                        <p class="text-2xl font-bold text-green-600" id="totalIngresos">$ 0</p>
+                        <p class="text-xs text-slate-400 mt-1">Este mes</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-md border-l-4 border-red-500">
+                        <p class="text-slate-500 text-sm">Total Gastos</p>
+                        <p class="text-2xl font-bold text-red-600" id="totalGastos">$ 0</p>
+                        <p class="text-xs text-slate-400 mt-1">Este mes</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-md border-l-4 border-indigo-500">
+                        <p class="text-slate-500 text-sm">Ganancia Neta</p>
+                        <p class="text-2xl font-bold text-indigo-600" id="gananciaNeta">$ 0</p>
+                        <p class="text-xs text-slate-400 mt-1">Ingresos - Gastos</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-md border-l-4 border-cyan-500">
+                        <p class="text-slate-500 text-sm">Semana Actual</p>
+                        <p class="text-2xl font-bold text-cyan-600" id="saldoSemana">$ 0</p>
+                        <p class="text-xs text-slate-400 mt-1">Día <span id="numeroSemana"></span></p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-5 shadow-md mb-8">
+                    <h3 class="font-semibold mb-4">Movimientos por Semana</h3>
+                    <div class="h-64"><canvas id="graficoSemanal"></canvas></div>
+                </div>
+            </section>
+
+            <!-- ➕ AGREGAR MOVIMIENTO -->
+            <section class="mb-16">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fa fa-plus-circle text-indigo-600"></i> Cargar Movimiento
+                </h2>
+                <div class="bg-white rounded-xl p-6 shadow-md mb-8">
+                    <form id="formMovimiento" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
+                                <select id="tipo" class="w-full p-3 border border-slate-300 rounded-lg">
+                                    <option value="ingreso">💰 Ingreso</option>
+                                    <option value="gasto">💸 Gasto</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Monto ($)</label>
+                                <input type="number" id="monto" step="1" min="1" required
+                                    class="w-full p-3 border border-slate-300 rounded-lg" placeholder="15000">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+                            <input type="text" id="descripcion" required
+                                class="w-full p-3 border border-slate-300 rounded-lg" placeholder="Venta, compra, etc.">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Fecha</label>
+                            <input type="date" id="fecha" required
+                                class="w-full p-3 border border-slate-300 rounded-lg">
+                        </div>
+                        <button type="submit" 
+                            class="w-full bg-indigo-600 text-white font-semibold p-3 rounded-lg hover:bg-indigo-700 transition">
+                            <i class="fa fa-save mr-2"></i> Guardar
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-xl p-5 shadow-md">
+                    <h3 class="font-semibold mb-4">Historial</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead><tr class="border-b-2 border-slate-200">
+                                <th class="text-left py-3 px-2">Fecha</th>
+                                <th class="text-left py-3 px-2">Descripción</th>
+                                <th class="text-left py-3 px-2">Tipo</th>
+                                <th class="text-right py-3 px-2">Monto</th>
+                                <th class="text-center py-3 px-2">Acción</th>
+                            </tr></thead>
+                            <tbody id="tablaMovimientos">
+                                <tr><td colspan="5" class="py-4 text-center text-slate-500">Sin movimientos aún</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 📈 RESUMEN -->
+            <section class="mb-16">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fa fa-calendar-check-o text-indigo-600"></i> Resumen
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl p-5 shadow-md">
+                        <h3 class="font-semibold text-lg mb-4">📅 Esta Semana</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between py-2 border-b border-slate-100">
+                                <span>Ingresos</span><span class="font-bold text-green-600" id="semanaIngresos">$0</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-slate-100">
+                                <span>Gastos</span><span class="font-bold text-red-600" id="semanaGastos">$0</span>
+                            </div>
+                            <div class="flex justify-between py-2 font-medium">
+                                <span>Balance</span><span class="font-bold text-lg" id="semanaBalance">$0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-md">
+                        <h3 class="font-semibold text-lg mb-4">📆 Este Mes</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between py-2 border-b border-slate-100">
+                                <span>Ingresos</span><span class="font-bold text-green-600" id="mesIngresos">$0</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-slate-100">
+                                <span>Gastos</span><span class="font-bold text-red-600" id="mesGastos">$0</span>
+                            </div>
+                            <div class="flex justify-between py-2 font-medium">
+                                <span>Balance</span><span class="font-bold text-lg" id="mesBalance">$0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 text-center">
+                    <button id="btnExportar" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg">
+                        <i class="fa fa-download mr-2"></i> Exportar Reporte
+                    </button>
+                </div>
+            </section>
+
+            <!-- 🤖 IA -->
+            <section class="mb-16">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fa fa-robot text-indigo-600"></i> Asistente IA
+                </h2>
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <div id="cajaRespuestaIA" class="bg-slate-50 rounded-lg p-4 mb-4 min-h-[120px] border border-slate-200">
+                        <p class="text-slate-500 italic">¡Hola! Carga movimientos y te daré análisis 💡</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                        <button onclick="preguntarIA('¿Cómo va mi negocio esta semana?')" 
+                            class="text-sm bg-slate-100 hover:bg-slate-200 p-2 rounded-lg">📊 ¿Cómo va la semana?</button>
+                        <button onclick="preguntarIA('¿Cuáles son mis gastos más altos y cómo reducirlos?')" 
+                            class="text-sm bg-slate-100 hover:bg-slate-200 p-2 rounded-lg">💸 Reducir gastos</button>
+                        <button onclick="preguntarIA('Hazme un pronóstico para el próximo mes')" 
+                            class="text-sm bg-slate-100 hover:bg-slate-200 p-2 rounded-lg">📈 Pronóstico mes</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="preguntaIA" placeholder="Preguntale a la IA..." 
+                            class="flex-1 p-3 border border-slate-300 rounded-lg">
+                        <button onclick="enviarPreguntaIA()" 
+                            class="bg-indigo-600 text-white px-5 rounded-lg hover:bg-indigo-700">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="bg-slate-900 text-white py-8 mt-12">
+            <div class="container mx-auto px-4 text-center">
+                <p class="font-bold text-lg">✨ Kira Gestión IA</p>
+                <p class="text-slate-400 text-sm mt-2">Control inteligente para tu negocio</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- CÓDIGO DE FUNCIONALIDADES -->
+    <script>
+        // ⚙️ TU CORREO DONDE LLEGAN LOS REGISTROS
+        const CORREO_DESTINO = "santyrobox@gmail.com";
+        
+        // Base de datos
+        let usuarios = JSON.parse(localStorage.getItem('kiraUsuarios')) || [];
+        let usuarioActual = JSON.parse(localStorage.getItem('kiraUsuarioActual')) || null;
+        let movimientos = [];
+        let grafico = null;
+
+        // ------------------- LOGIN / REGISTRO -------------------
+        const pantallaLogin = document.getElementById('pantallaLogin');
+        const appPrincipal = document.getElementById('appPrincipal');
+        const tabLogin = document.getElementById('tabLogin');
+        const tabRegistro = document.getElementById('tabRegistro');
+        const formLogin = document.getElementById('formLogin');
+        const formRegistro = document.getElementById('formRegistro');
+        const mensajeAuth = document.getElementById('mensajeAuth');
+        const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+        const usuarioActivo = document.getElementById('usuarioActivo');
+
+        // Cambiar pestañas
+        tabLogin.addEventListener('click', () => {
+            formLogin.classList.remove('hidden');
+            formRegistro.classList.add('hidden');
+            tabLogin.classList.add('bg-white', 'shadow', 'text-indigo-600', 'font-semibold');
+            tabLogin.classList.remove('text-slate-500');
+            tabRegistro.classList.remove('bg-white', 'shadow', 'text-indigo-600');
+            tabRegistro.classList.add('text-slate-500', 'font-semibold');
+            mensajeAuth.textContent = '';
+        });
+
+        tabRegistro.addEventListener('click', () => {
+            formRegistro.classList.remove('hidden');
+            formLogin.classList.add('hidden');
+            tabRegistro.classList.add('bg-white', 'shadow', 'text-indigo-600', 'font-semibold');
+            tabRegistro.classList.remove('text-slate-500');
+            tabLogin.classList.remove('bg-white', 'shadow', 'text-indigo-600');
+            tabLogin.classList.add('text-slate-500', 'font-semibold');
+            mensajeAuth.textContent = '';
+        });
+
+        // Registro
+        formRegistro.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('regNombre').value.trim();
+            const correo = document.getElementById('regCorreo').value.trim().toLowerCase();
+            const pass = document.getElementById('regPass').value;
+
+            if (!correo.includes('@')) {
+                mensajeAuth.textContent = '⚠️ Poné un correo válido';
+                mensajeAuth.className = 'text-center text-sm mt-4 text-red-500';
+                return;
+            }
+
+            if (usuarios.find(u => u.correo === correo)) {
+                mensajeAuth.textContent = '⚠️ Este correo ya está registrado';
+                mensajeAuth.className = 'text-center text-sm mt-4 text-red-500';
+                return;
+            }
+
+            const nuevoUsuario = {
+                id: Date.now(),
+                nombre,
+                correo,
+                pass,
+                fechaRegistro: new Date().toLocaleString('es-AR')
+            };
+
+            usuarios.push(nuevoUsuario);
+            localStorage.setItem('kiraUsuarios', JSON.stringify(usuarios));
+
+            // 📩 ENVIAR DATOS A TU CORREO
+            try {
+                const asunto = encodeURIComponent('🆕 Nuevo registro — Kira Gestión IA');
+                const cuerpo = encodeURIComponent(
+`NUEVO USUARIO REGISTRADO:
+
+👋 Nombre: ${nombre}
+📧 Correo: ${correo}
+📅 Fecha: ${nuevoUsuario.fechaRegistro}
+
+---
+Kira Gestión IA`
+                );
+                
+                // Abrimos el cliente de correo del usuario con todo listo
+                window.open(`mailto:${CORREO_DESTINO}?subject=${asunto}&body=${cuerpo}`, '_blank');
+            } catch (err) {
+                console.log('Correo no se abrió');
+            }
+
+            mensajeAuth.textContent = '✅ ¡Registrado! Revisá tu correo y luego inicia sesión 👇';
+            mensajeAuth.className = 'text-center text-sm mt-4 text-green-600';
+            
+            // Cambiar a login tras 2 segundos
+            setTimeout(() => tabLogin.click(), 2500);
+            formRegistro.reset();
+        });
+
+        // Login
+        formLogin.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const correo = document.getElementById('loginCorreo').value.trim().toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+
+            const usuario = usuarios.find(u => u.correo === correo && u.pass === pass);
+
+            if (!usuario) {
+                mensajeAuth.textContent = '❌ Correo o contraseña incorrectos';
+                mensajeAuth.className = 'text-center text-sm mt-4 text-red-500';
+                return;
+            }
+
+            // Inicio de sesión exitoso
+            usuarioActual = usuario;
+            localStorage.setItem('kiraUsuarioActual', JSON.stringify(usuario));
+            entrarApp();
+        });
+
+        // Cerrar sesión
+        btnCerrarSesion.addEventListener('click', () => {
+            localStorage.removeItem('kiraUsuarioActual');
+            usuarioActual = null;
+            movimientos = [];
+            salirApp();
+        });
+
+        function entrarApp() {
+            pantallaLogin.classList.add('hidden');
+            appPrincipal.classList.remove('hidden');
+            usuarioActivo.textContent = usuarioActual.nombre;
+            cargarDatosUsuario();
+            document.getElementById('fecha').valueAsDate = new Date();
+            document.getElementById('numeroSemana').textContent = obtenerNumeroSemana();
+            actualizarTodo();
+        }
+
+        function salirApp() {
+            appPrincipal.classList.add('hidden');
+            pantallaLogin.classList.remove('hidden');
+            tabLogin.click();
+            formLogin.reset();
+        }
+
+        function cargarDatosUsuario() {
+            const clave = 'kiraMovimientos_' + usuarioActual.id;
+            movimientos = JSON.parse(localStorage.getItem(clave)) || [];
+        }
+
+        function guardarDatosUsuario() {
+            localStorage.setItem('kiraMovimientos_' + usuarioActual.id, JSON.stringify(movimientos));
+        }
+
+        // Si ya hay sesión activa, entrar directo
+        if (usuarioActual) entrarApp();
+
+        // ------------------- GESTIÓN DE MOVIMIENTOS -------------------
+        document.getElementById('formMovimiento').addEventListener('submit', guardarMovimiento);
+
+        function guardarMovimiento(e) {
+            e.preventDefault();
+            const movimiento = {
+                id: Date.now(),
+                tipo: document.getElementById('tipo').value,
+                monto: parseFloat(document.getElementById('monto').value),
+                descripcion: document.getElementById('descripcion').value.trim(),
+                fecha: document.getElementById('fecha').value
+            };
+            movimientos.push(movimiento);
+            guardarDatosUsuario();
+            actualizarTodo();
+            e.target.reset();
+            document.getElementById('fecha').valueAsDate = new Date();
+            mostrarNotificacion('✅ Guardado');
+        }
+
+        function eliminarMovimiento(id) {
+            if(confirm('¿Eliminar?')) {
+                movimientos = movimientos.filter(m => m.id !== id);
+                guardarDatosUsuario();
+                actualizarTodo();
+            }
+        }
+
+        function obtenerNumeroSemana() {
+            const hoy = new Date();
+            const primerDia = new Date(hoy.getFullYear(), 0, 1);
+            return Math.ceil((((hoy - primerDia) / 86400000) + primerDia.getDay() + 1) / 7);
+        }
+
+        function formatearMonto(monto) {
+            return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto);
+        }
+
+        function actualizarTodo() {
+            actualizarTabla();
+            actualizarResumenes();
+            actualizarGrafico();
+        }
+
+        function actualizarTabla() {
+            const tbody = document.getElementById('tablaMovimientos');
+            if (movimientos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500">Sin movimientos aún</td></tr>`;
+                return;
+            }
+            const ordenados = [...movimientos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            tbody.innerHTML = ordenados.map(m => `
+                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                    <td class="py-3 px-2">${new Date(m.fecha+'T00:00:00').toLocaleDateString('es-AR')}</td>
+                    <td class="py-3 px-2">${m.descripcion}</td>
+                    <td class="py-3 px-2"><span class="px-2 py-1 rounded text-xs ${m.tipo==='ingreso'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${m.tipo==='ingreso'?'💰 Ingreso':'💸 Gasto'}</span></td>
+                    <td class="py-3 px-2 text-right font-medium">${formatearMonto(m.monto)}</td>
+                    <td class="py-3 px-2 text-center"><button onclick="eliminarMovimiento(${m.id})" class="text-slate-400 hover:text-red-500"><i class="fa fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function calcularResumen(filtroSemanal = false) {
+            const hoy = new Date();
+            const inicioSemana = new Date(hoy);
+            inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+            const mesActual = hoy.getMonth(), anioActual = hoy.getFullYear();
+            let filtro = movimientos;
+            if (filtroSemanal) filtro = movimientos.filter(m => new Date(m.fecha+'T00:00:00') >= inicioSemana);
+            else filtro = movimientos.filter(m => { const f=new Date(m.fecha+'T00:00:00'); return f.getMonth()===mesActual && f.getFullYear()===anioActual; });
+            const ingresos = filtro.filter(m=>m.tipo==='ingreso').reduce((s,m)=>s+m.monto,0);
+            const gastos = filtro.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+m.monto,0);
+            return { ingresos, gastos, total: ingresos - gastos };
+        }
+
+        function actualizarResumenes() {
+            const semana = calcularResumen(true), mes = calcularResumen(false);
+            document.getElementById('totalIngresos').textContent = formatearMonto(mes.ingresos);
+            document.getElementById('totalGastos').textContent = formatearMonto(mes.gastos);
+            document.getElementById('gananciaNeta').textContent = formatearMonto(mes.total);
+            document.getElementById('saldoSemana').textContent = formatearMonto(semana.total);
+            document.getElementById('semanaIngresos').textContent = formatearMonto(semana.ingresos);
+            document.getElementById('semanaGastos').textContent = formatearMonto(semana.gastos);
+            document.getElementById('semanaBalance').textContent = formatearMonto(semana.total);
+            document.getElementById('semanaBalance').className = `font-bold text-lg ${semana.total >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            document.getElementById('mesIngresos').textContent = formatearMonto(mes.ingresos);
+            document.getElementById('mesGastos').textContent = formatearMonto(mes.gastos);
+            document.getElementById('mesBalance').textContent = formatearMonto(mes.total);
+            document.getElementById('mesBalance').className = `font-bold text-lg ${mes.total >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        }
+
+        function actualizarGrafico() {
+            const ctx = document.getElementById('graficoSemanal')?.getContext('2d');
+            if (!ctx) return;
+            const semanas = {};
+            movimientos.forEach(m => {
+                const fecha = new Date(m.fecha+'T00:00:00');
+                const numSem = Math.ceil((((fecha - new Date(fecha.getFullYear(),0,1))/86400000)+new Date(fecha.getFullYear(),0,1).getDay()+1)/7);
+                const clave = `Sem ${numSem}`;
+                if (!semanas[clave]) semanas[clave]={ingresos:0,gastos:0};
+                semanas[clave][m.tipo==='ingreso'?'ingresos':'gastos']+=m.monto;
+            });
+            const etiquetas = Object.keys(semanas).slice(-6);
+            const datosIng = etiquetas.map(s=>semanas[s].ingresos);
+            const datosGast = etiquetas.map(s=>semanas[s].gastos);
+            if (grafico) grafico.destroy();
+            grafico = new Chart(ctx, {
+                type:'bar',
+                data:{labels:etiquetas,datasets:[{label:'Ingresos',data:datosIng,backgroundColor:'#4ade80'},{label:'Gastos',data:datosGast,backgroundColor:'#f87171'}]},
+                options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>'$'+v}}}}
+            });
+        }
+
+        // 🤖 IA
+        function analizarIA(pregunta) {
+            const semana = calcularResumen(true), mes = calcularResumen(false);
+            const promedioDiario = mes.ingresos / new Date().getDate() || 0;
+            if (pregunta.includes('semana') && pregunta.includes('negocio')) {
+                return `📊 **Análisis de la Semana:**\n• Ingresos: ${formatearMonto(semana.ingresos)}\n• Gastos: ${formatearMonto(semana.gastos)}\n• Balance: ${formatearMonto(semana.total)}\n\n${semana.total >= 0 ? '✅ ¡Vas muy bien! 🚀' : '⚠️ Revisá gastos e incrementá ventas.'}`;
+            } else if (pregunta.includes('gasto') && pregunta.includes('reducir')) {
+                return `💡 **Recomendaciones para reducir gastos:**\n• Gastos esta semana: ${formatearMonto(semana.gastos)}\n• Registrá TODO por mínimo que sea\n• Compará proveedores antes de comprar\n• Evitá stock innecesario\n• Establecé un tope de gastos diario`;
+            } else if (pregunta.includes('pronóstico') || pregunta.includes('próximo mes')) {
+                const proyeccion = promedioDiario * 30;
+                return `📈 **Pronóstico:**\n• Promedio diario: ${formatearMonto(promedioDiario)}\n• Proyección mensual: ~${formatearMonto(proyeccion)}\n• Balance estimado: ~${formatearMonto(proyeccion - mes.gastos)}\n\n💡 Más promociones, menos gastos, mejores precios 🚀`;
+            }
+            return `🤖 **Resumen General:**\n💰 Mes: ${formatearMonto(mes.ingresos)} ing / ${formatearMonto(mes.gastos)} gasto → ${formatearMonto(mes.total)}\n📅 Semana: ${formatearMonto(semana.total)}\n📈 Promedio diario: ${formatearMonto(promedioDiario)}\n\n¿Qué más querés saber?`;
+        }
+
+        function preguntarIA(pregunta) {
+            document.getElementById('cajaRespuestaIA').innerHTML = `<p class="text-indigo-600">🤖 Analizando...</p>`;
+            setTimeout(() => { document.getElementById('cajaRespuestaIA').innerHTML = `<p class="whitespace-pre-line">${analizarIA(pregunta)}</p>`; }, 800);
+        }
+
+        function enviarPreguntaIA() {
+            const pregunta = document.getElementById('preguntaIA').value.trim();
+            if (!pregunta) return;
+            preguntarIA(pregunta);
+            document.getElementById('preguntaIA').value = '';
+        }
+
+        // Exportar
+        document.getElementById('btnExportar')?.addEventListener('click', () => {
+            if (!movimientos.length) { alert('No hay datos'); return; }
+            const csv = 'Fecha,Descripción,Tipo,Monto\n' + movimientos.map(m=>`${m.fecha},"${m.descripcion}",${m.tipo},${m.monto}`).join('\n');
+            const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `Kira_Reporte_${new Date().toLocaleDateString('es-AR').replace(/\//g,'-')}.csv`;
+            a.click(); URL.revokeObjectURL(url);
+        });
+
+        function mostrarNotificacion(msg) {
+            const n = document.createElement('div');
+            n.className = 'fixed bottom-4 right-4 bg-indigo-600 text-white px-5 py-3 rounded-lg shadow-xl z-50';
+            n.textContent = msg; document.body.appendChild(n);
+            setTimeout(()=>n.remove(),2500);
+        }
+    </script>
+</body>
+</html>
